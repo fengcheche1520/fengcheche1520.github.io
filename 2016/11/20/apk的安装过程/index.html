@@ -1,0 +1,763 @@
+<!doctype html>
+
+
+
+
+<html class="theme-next pisces">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="一 Android应用的常见安装方法以及应用文件的分布情况Android应用安装的途径主要有以下几种：
+
+
+
+安装方法
+有无安装界面
+
+
+
+
+通过系统自带的应用商店安装
+无
+
+
+直接打开已下载的apk文件安装（需要打开系统设置中的未知来源）
+有
+
+
+通过adb install（其实是调用pm install）安装
+无
+
+
+直接复制apk文件到一个应用的目录中（只能用于工程版设备）
+无
+
+
+
+
+注：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="apk文件的安装过程">
+<meta property="og:url" content="http://fengcheche1520.github.io/2016/11/20/apk的安装过程/index.html">
+<meta property="og:site_name" content="biubiubiu~的博客">
+<meta property="og:description" content="一 Android应用的常见安装方法以及应用文件的分布情况Android应用安装的途径主要有以下几种：
+
+
+
+安装方法
+有无安装界面
+
+
+
+
+通过系统自带的应用商店安装
+无
+
+
+直接打开已下载的apk文件安装（需要打开系统设置中的未知来源）
+有
+
+
+通过adb install（其实是调用pm install）安装
+无
+
+
+直接复制apk文件到一个应用的目录中（只能用于工程版设备）
+无
+
+
+
+
+注：">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/apkinstall.png">
+<meta property="og:updated_time" content="2017-01-20T13:02:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="apk文件的安装过程">
+<meta name="twitter:description" content="一 Android应用的常见安装方法以及应用文件的分布情况Android应用安装的途径主要有以下几种：
+
+
+
+安装方法
+有无安装界面
+
+
+
+
+通过系统自带的应用商店安装
+无
+
+
+直接打开已下载的apk文件安装（需要打开系统设置中的未知来源）
+有
+
+
+通过adb install（其实是调用pm install）安装
+无
+
+
+直接复制apk文件到一个应用的目录中（只能用于工程版设备）
+无
+
+
+
+
+注：">
+<meta name="twitter:image" content="http://ogxxjg42b.bkt.clouddn.com/apkinstall.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"always"},
+    fancybox: true,
+    motion: false,
+    duoshuo: {
+      userId: '6356836129215350000',
+      author: 'author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://fengcheche1520.github.io/2016/11/20/apk的安装过程/"/>
+
+
+  <title> apk文件的安装过程 | biubiubiu~的博客 </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">biubiubiu~的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">欢迎来到我的博客</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/index.html" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                apk文件的安装过程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-20T19:57:56+08:00" content="2016-11-20">
+              2016-11-20
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/20/apk的安装过程/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/20/apk的安装过程/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h3 id="一-Android应用的常见安装方法以及应用文件的分布情况"><a href="#一-Android应用的常见安装方法以及应用文件的分布情况" class="headerlink" title="一 Android应用的常见安装方法以及应用文件的分布情况"></a>一 Android应用的常见安装方法以及应用文件的分布情况</h3><p>Android应用安装的途径主要有以下几种：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:left">安装方法</th>
+<th style="text-align:center">有无安装界面</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:left">通过系统自带的应用商店安装</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:left">直接打开已下载的apk文件安装（需要打开系统设置中的未知来源）</td>
+<td style="text-align:center">有</td>
+</tr>
+<tr>
+<td style="text-align:left">通过adb install（其实是调用pm install）安装</td>
+<td style="text-align:center">无</td>
+</tr>
+<tr>
+<td style="text-align:left">直接复制apk文件到一个应用的目录中（只能用于工程版设备）</td>
+<td style="text-align:center">无</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>注：当一个apk文件被直接复制到一个应用目录下时，它由包管理器自动查找并安装（包管理器会监视这些目录的变化）。其它的安装方法都是调用系统包管理器的installPackage方法，然后复制apk文件到一个应用目录下并安装。</p>
+</blockquote>
+<h4 id="apk应用安装后文件的分布位置"><a href="#apk应用安装后文件的分布位置" class="headerlink" title="apk应用安装后文件的分布位置"></a>apk应用安装后文件的分布位置</h4><p>Android主要的分区情况：system、data（可以在adb中使用df查看详细情况）。跨分区不能使用mv可以使用cp。<br>Android用户组有system、root和shell<br>大部分系统应用都可以在/system/app中找到，/system/priv-app中保存这有特权的应用（可以被授权signatureOrSystem），/system/vendor/app下是厂商专有的应用。<br>用户安装的应用在data分区中，大部分被安装在/data/app目录下。<br>应用程序数据存储的目录在/data/data/xxx目录下（xxx是应用的包名），/data/dalvik-cache目录存放了被优化过的dex文件。</p>
+<h3 id="二-包管理器中应用安装相关的组件"><a href="#二-包管理器中应用安装相关的组件" class="headerlink" title="二 包管理器中应用安装相关的组件"></a>二 包管理器中应用安装相关的组件</h3><h4 id="PackageInstaller（系统应用）"><a href="#PackageInstaller（系统应用）" class="headerlink" title="PackageInstaller（系统应用）"></a>PackageInstaller（系统应用）</h4><p>默认打开apk文件的应用，当传递VIEW或者INSTALL_PACKAGE action并附带apk的URI（文件路径）和类型（application/vnd.android.package-archive）时，PackageInstaller就会处理安装包，然后调用PackageManagerService执行安装过程。（使用这个应用安装apk时，只有在勾选了安全设置中的“未知来源”才能进行）</p>
+<blockquote>
+<p>注：未知来源的定义：PackageInstaller获取待安装应用的UID，先检查应用是否属于特权应用，如果不具有特权则认为它是一个未知来源的应用。（对于如何判断特权应用待以后分析源码再详细分析）</p>
+</blockquote>
+<h4 id="pm命令"><a href="#pm命令" class="headerlink" title="pm命令"></a>pm命令</h4><p>在android shell中使用pm install或pm uninstall可以安装或卸载应用，adb install实际上也是调用的pm进行安装应用。pm install不依赖“未知来源”选项，不会弹出安装界面。</p>
+<h4 id="PackageManagerService系统服务"><a href="#PackageManagerService系统服务" class="headerlink" title="PackageManagerService系统服务"></a>PackageManagerService系统服务</h4><p>android包管理器中的核心。它负责解析apk文件，安装、更新、卸载包，维护数据库和权限管理。PackageManagerService中有许多installPackage方法，以在不同参数下执行安装。它运行在系统服务进程（system uid）中，没有root权限</p>
+<h4 id="installd守护进程"><a href="#installd守护进程" class="headerlink" title="installd守护进程"></a>installd守护进程</h4><p>一个具有特权的本地守护进程，向包管理器提供应用和用户目录管理的功能。可以通过/dev/socket/installd（只能被system运行的进程访问）套接字访问installd。installd不以root执行，它利用linux的CAP_DAC_OVERRIDE的CAP_CHOWN来设置应用创建文件/目录的UID和GID。</p>
+<h4 id="MountService系统服务"><a href="#MountService系统服务" class="headerlink" title="MountService系统服务"></a>MountService系统服务</h4><p>挂载可分离式的外存（SDcard），也可以挂载OBB（opaque binary blob）文件，MountService还用于启动设备加密和更改加密密码，它还管理安全容器（用于实现转发锁定的DRM机制，转发锁定英语付费应用的安装，确保apk不能轻易被复制和再发布）</p>
+<h4 id="vold守护进程"><a href="#vold守护进程" class="headerlink" title="vold守护进程"></a>vold守护进程</h4><p>挂载和卸载磁盘，创建和格式化文件系统，管理安全容器。通过/dev/socket/vold（只能被root和mount组成员访问）访问。</p>
+<h4 id="MediaContainerService"><a href="#MediaContainerService" class="headerlink" title="MediaContainerService"></a>MediaContainerService</h4><p>负责将apk文件复制到最终的安装位置。</p>
+<h4 id="AppDirObserver"><a href="#AppDirObserver" class="headerlink" title="AppDirObserver"></a>AppDirObserver</h4><p>检测应用目录下文件的改动，调用PackageManagerService的相应方法响应改动。apk被移除时，AppDirObserver启动卸载进程，删除app目录和包数据库中相应的条目。<br>system分区上监视的目录：framework、app、priv-app、vendor/app<br>data分区上监视的目录：app、app-private</p>
+<h3 id="三-apk安装流程"><a href="#三-apk安装流程" class="headerlink" title="三 apk安装流程"></a>三 apk安装流程</h3><p><img src="http://ogxxjg42b.bkt.clouddn.com/apkinstall.png" alt=""> </p>
+<h4 id="1、apk解析和验证"><a href="#1、apk解析和验证" class="headerlink" title="1、apk解析和验证"></a>1、apk解析和验证</h4><p>打开apk文件时会触发系统应用PackageInstaller的启动，在PackageInstallerActivity（以下简称PIA）中检查应用是否受信任，检查安全设置中的未知来源选项，判断应用是否允许被安装。如果允许安装应用，PIA解析apk，从manifest文件中提取信息和包签名，校验apk文件的完整性。（系统应用默认被信任，只验证Manifest文件的完整性，非系统应用的所有文件都要被验证）</p>
+<h4 id="2、启动安装进程"><a href="#2、启动安装进程" class="headerlink" title="2、启动安装进程"></a>2、启动安装进程</h4><p>apk解析和验证通过后，PIA会显示应用申请的权限，并提示用户是否确认安装，用户确认安装后PIA将apk文件的URI和manifest摘要发送给InstallAppProgress，然后由它启动安装进程。InstallAppPregress将URI和元数据传递给installPackageWithVerificationAndEncryption，然后等待安装进程完成以及处理各种错误信息。</p>
+<h4 id="3、复制apk到应用程序目录"><a href="#3、复制apk到应用程序目录" class="headerlink" title="3、复制apk到应用程序目录"></a>3、复制apk到应用程序目录</h4><p>PackageManagerService（PMS）先创建临时文件，然后委派MediaContainerService进行文件复制、重命名、修改权限等设置</p>
+<h4 id="4、扫描包和创建数据目录"><a href="#4、扫描包和创建数据目录" class="headerlink" title="4、扫描包和创建数据目录"></a>4、扫描包和创建数据目录</h4><p>包扫描检测到新安装应用，创建PackageSettings结构并设置相关的值（包名、代码资源路径、UID等），接着PMS想installd进程发送install命令，让它创建数据目录/data/data/xxx并设置权限、SELinux环境，最后设置SELinux所有者到app的UID。生成优化dex</p>
+<h4 id="5、向包数据库添加条目，更新组件"><a href="#5、向包数据库添加条目，更新组件" class="headerlink" title="5、向包数据库添加条目，更新组件"></a>5、向包数据库添加条目，更新组件</h4><p>添加新安装的包信息到package.xml，PMS扫描新应用的组件和权限并添加到注册表中，最后发送ACTION_PACKAGE_ADDED通知其它组件新应用的安装。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag">#Android</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/13/vim源码安装/" rel="next" title="YouCompleteMe插件的配置和Vim源码安装">
+                <i class="fa fa-chevron-left"></i> YouCompleteMe插件的配置和Vim源码安装
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/11/20/hexo/" rel="prev" title="在ubuntu中利用hexo和github搭建博客">
+                在ubuntu中利用hexo和github搭建博客 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/11/20/apk的安装过程/"
+           data-title="apk文件的安装过程" data-url="http://fengcheche1520.github.io/2016/11/20/apk的安装过程/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ogxxjg42b.bkt.clouddn.com/blog/image/gif/portrait.gif"
+               alt="zj lu" />
+          <p class="site-author-name" itemprop="name">zj lu</p>
+          <p class="site-description motion-element" itemprop="description">biubiubiu~</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/fengcheche1520" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/234329236" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#一-Android应用的常见安装方法以及应用文件的分布情况"><span class="nav-number">1.</span> <span class="nav-text">一 Android应用的常见安装方法以及应用文件的分布情况</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#apk应用安装后文件的分布位置"><span class="nav-number">1.1.</span> <span class="nav-text">apk应用安装后文件的分布位置</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#二-包管理器中应用安装相关的组件"><span class="nav-number">2.</span> <span class="nav-text">二 包管理器中应用安装相关的组件</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#PackageInstaller（系统应用）"><span class="nav-number">2.1.</span> <span class="nav-text">PackageInstaller（系统应用）</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#pm命令"><span class="nav-number">2.2.</span> <span class="nav-text">pm命令</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#PackageManagerService系统服务"><span class="nav-number">2.3.</span> <span class="nav-text">PackageManagerService系统服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#installd守护进程"><span class="nav-number">2.4.</span> <span class="nav-text">installd守护进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MountService系统服务"><span class="nav-number">2.5.</span> <span class="nav-text">MountService系统服务</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#vold守护进程"><span class="nav-number">2.6.</span> <span class="nav-text">vold守护进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#MediaContainerService"><span class="nav-number">2.7.</span> <span class="nav-text">MediaContainerService</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#AppDirObserver"><span class="nav-number">2.8.</span> <span class="nav-text">AppDirObserver</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#三-apk安装流程"><span class="nav-number">3.</span> <span class="nav-text">三 apk安装流程</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1、apk解析和验证"><span class="nav-number">3.1.</span> <span class="nav-text">1、apk解析和验证</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2、启动安装进程"><span class="nav-number">3.2.</span> <span class="nav-text">2、启动安装进程</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3、复制apk到应用程序目录"><span class="nav-number">3.3.</span> <span class="nav-text">3、复制apk到应用程序目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#4、扫描包和创建数据目录"><span class="nav-number">3.4.</span> <span class="nav-text">4、扫描包和创建数据目录</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#5、向包数据库添加条目，更新组件"><span class="nav-number">3.5.</span> <span class="nav-text">5、向包数据库添加条目，更新组件</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zj lu</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"biubiuno"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

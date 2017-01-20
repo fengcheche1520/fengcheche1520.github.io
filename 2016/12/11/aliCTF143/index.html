@@ -1,0 +1,661 @@
+<!doctype html>
+
+
+
+
+<html class="theme-next pisces">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="逆向 脱壳 破解," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="题目出处: ali的一道ctf题，要求输入一个url弹出flag。样本下载： http://pan.baidu.com/s/1dE6S4mP
+
+0x00 初步分析用jeb工具反编译apk:可以看到assets目录下有两个jar文件，lib目录下有三个so，打开Manifest文件看到app的入口为StubApplication类，主程序的入口为com.ali.tg.testapp.MainAct">
+<meta property="og:type" content="article">
+<meta property="og:title" content="阿里CTF2014第三题分析">
+<meta property="og:url" content="http://fengcheche1520.github.io/2016/12/11/aliCTF143/index.html">
+<meta property="og:site_name" content="biubiubiu~的博客">
+<meta property="og:description" content="题目出处: ali的一道ctf题，要求输入一个url弹出flag。样本下载： http://pan.baidu.com/s/1dE6S4mP
+
+0x00 初步分析用jeb工具反编译apk:可以看到assets目录下有两个jar文件，lib目录下有三个so，打开Manifest文件看到app的入口为StubApplication类，主程序的入口为com.ali.tg.testapp.MainAct">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/mainfestinfo.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/stubapplication.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/jniregisternatives.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/nativemethods.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/initclasses.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/parsedex.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/openwithHeader.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/dvmopendexfile.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/init.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/breakpoint.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/dumpdex.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/MainActivity.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/loadtranslate.png">
+<meta property="og:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/WebViewActivity.png">
+<meta property="og:updated_time" content="2017-01-20T13:02:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="阿里CTF2014第三题分析">
+<meta name="twitter:description" content="题目出处: ali的一道ctf题，要求输入一个url弹出flag。样本下载： http://pan.baidu.com/s/1dE6S4mP
+
+0x00 初步分析用jeb工具反编译apk:可以看到assets目录下有两个jar文件，lib目录下有三个so，打开Manifest文件看到app的入口为StubApplication类，主程序的入口为com.ali.tg.testapp.MainAct">
+<meta name="twitter:image" content="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/mainfestinfo.png">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"always"},
+    fancybox: true,
+    motion: false,
+    duoshuo: {
+      userId: '6356836129215350000',
+      author: 'author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://fengcheche1520.github.io/2016/12/11/aliCTF143/"/>
+
+
+  <title> 阿里CTF2014第三题分析 | biubiubiu~的博客 </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">biubiubiu~的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">欢迎来到我的博客</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/index.html" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                阿里CTF2014第三题分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-12-11T20:50:56+08:00" content="2016-12-11">
+              2016-12-11
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/12/11/aliCTF143/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/12/11/aliCTF143/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>题目出处: ali的一道ctf题，要求输入一个url弹出flag。<br>样本下载： <a href="http://pan.baidu.com/s/1dE6S4mP" target="_blank" rel="external">http://pan.baidu.com/s/1dE6S4mP</a></p>
+</blockquote>
+<h3 id="0x00-初步分析"><a href="#0x00-初步分析" class="headerlink" title="0x00 初步分析"></a>0x00 初步分析</h3><p>用jeb工具反编译apk:<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/mainfestinfo.png" alt=""><br>可以看到assets目录下有两个jar文件，lib目录下有三个so，打开Manifest文件看到app的入口为StubApplication类，主程序的入口为com.ali.tg.testapp.MainActivity，打开StubApplication类：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/stubapplication.png" alt=""><br>这个类加载了lib目录下的libmobisec.so，可以看到attachBaseContext和onCreate方法声明为了native方法，说明主程序的启动放在了so中。<br>初步判断可以知道apk经过了加壳处理，因此首先得脱壳。</p>
+<h3 id="0x01-静态分析mobisec"><a href="#0x01-静态分析mobisec" class="headerlink" title="0x01 静态分析mobisec"></a>0x01 静态分析mobisec</h3><p>用IDA加载libmobisec.so分析一下so的大致逻辑，在函数窗口中CTRL+F搜索JNI_OnLoad(so在加载的时候会先执行JNI_OnLoad中的方法)，修改一下函数中参数的类型（具体修改方法上网搜索IDA导入jni.h和修改参数类型），如下图所示：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/jniregisternatives.png" alt=""><br>从上图标记的位置可以看到JNI_OnLoad方法中注册了本地方法，方法映射表为结构体off_59004，双击进入：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/nativemethods.png" alt=""><br>可以看到这里注册了attachBaseContext和onCreate方法，其中sub_256C0和sub_24E50分别是attachBaseContext和onCreate对应于C中的函数指针（查看JNI中定义的的结构得知），由于attachBaseContext比onCreate先执行，先看看sub_256C0中的内容，参数修正什么的查对应的函数声明修改参数类型。（attachBaseContext声明时只有一个参数Context（可以在jeb反编译出的StubApplication中查看），非static函数在C中还加入两个参数JNIEnv和jclass）<br>函数内容有点长，从开头的位置看：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/initclasses.png" alt=""><br>第一个参数也是JNIEnv双击进入修正查看代码，发现是一堆GetFieldID和GetMethodID，但并没有调用什么函数，应该是初始化什么东西，先不管，返回来继续往下看sub_256C0函数。<br>看到函数中有大量的log信息，可以先查看log，然后看附近的代码，在下方看到log：enter new application，可能有感兴趣的东西，查看附近代码：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/parsedex.png" alt=""><br>看到调用了parse_dex函数，从字面上看应该是解析dex文件了，跟进去查看代码：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/openwithHeader.png" alt=""><br>这里判断了sdk的版本如果大于13就调用openWithHeader否则调用open，一般的手机都是4.0以上sdk版本大于13，跟进函数中查看：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div></pre></td><td class="code"><pre><div class="line">v4 = (const char *)*((_DWORD *)this + 2);</div><div class="line">  v5 = this;</div><div class="line">  v28 = a2;</div><div class="line">  v6 = a3;</div><div class="line">  v29 = a4;</div><div class="line">  if ( !v4 )</div><div class="line">  &#123;</div><div class="line">    v7 = &quot;debug&quot;;</div><div class="line">    v8 = &quot;file path is null&quot;;</div><div class="line">LABEL_5:</div><div class="line">    j_j___android_log_print(6, v7, v8);</div><div class="line">    return 0;</div><div class="line">  &#125;</div><div class="line">  v9 = j_j_open(v4, 0);</div><div class="line">  if ( j_j_fstat(v9, &amp;buf) )</div><div class="line">  &#123;</div><div class="line">    v7 = &quot;debug&quot;;</div><div class="line">    v8 = &quot;fstat failed&quot;;</div><div class="line">    goto LABEL_5;</div><div class="line">  &#125;</div><div class="line">  v11 = buf.st_blksize;</div><div class="line">  *v6 = buf.st_blksize;</div><div class="line">  *(_DWORD *)v5 = v11;</div><div class="line">  v12 = (ali *)j_j_mmap(0, *v6, 3, 2, v9, 0);</div><div class="line">  *((_DWORD *)v5 + 1) = v12;</div><div class="line">  j_j_close(v9);</div><div class="line">  v13 = (ali *)j_j___android_log_print(</div><div class="line">                 3,</div><div class="line">                 &quot;debug&quot;,</div><div class="line">                 &quot;dex magic %c %c %c %c %c %c %c&quot;,</div><div class="line">                 *(_BYTE *)v12,</div><div class="line">                 *((_BYTE *)v12 + 1),</div><div class="line">                 *((_BYTE *)v12 + 2),</div><div class="line">                 *((_BYTE *)v12 + 3),</div><div class="line">                 *((_BYTE *)v12 + 4),</div><div class="line">                 *((_BYTE *)v12 + 5),</div><div class="line">                 *((_BYTE *)v12 + 6));</div><div class="line">  LODWORD(v14) = ali::NanoTime(v13);</div><div class="line">  v15 = v14;</div><div class="line">  v17 = (ali *)ali::decryptRc4(v12, (const unsigned __int8 *)v12, (unsigned __int8 *)v6, v16);</div><div class="line">  v18 = ali::NanoTime(v17);</div><div class="line">  ali::PrettyDuration((ali *)(v18 - v15), v15);</div><div class="line">  j_j___android_log_print(3, &quot;debug&quot;, &quot;decrypted len:%u&quot;, *v6);</div><div class="line">  j_j___android_log_print(</div><div class="line">    3,</div><div class="line">    &quot;debug&quot;,</div><div class="line">    &quot;after decrypt dex magic %c %c %c %c %c %c %c&quot;,</div><div class="line">    *(_BYTE *)v12,</div><div class="line">    *((_BYTE *)v12 + 1),</div><div class="line">    *((_BYTE *)v12 + 2),</div><div class="line">    *((_BYTE *)v12 + 3),</div><div class="line">    *((_BYTE *)v12 + 4),</div><div class="line">    *((_BYTE *)v12 + 5),</div><div class="line">    *((_BYTE *)v12 + 6));</div><div class="line">  v19 = 0;</div><div class="line">  v27 = 0;</div><div class="line">  do</div><div class="line">  &#123;</div><div class="line">    v20 = j_j___ashldi3(*((_BYTE *)v12 + v19 + 5), 8 * v19);</div><div class="line">    ++v19;</div><div class="line">    v27 += v20;</div><div class="line">  &#125;</div><div class="line">  while ( v19 != 8 );</div><div class="line">  j_j___android_log_print(3, &quot;debug&quot;, &quot;unpackSize: %u&quot;, v27);</div><div class="line">  *(_DWORD *)v5 = v29 + v27;</div><div class="line">  v21 = (ali *)j_j_mmap(0, v29 + v27, 3, 34, -1, 0);</div><div class="line">  *((_DWORD *)v5 + 1) = v21;</div><div class="line">  v22 = (int)v21 + v29;</div><div class="line">  LODWORD(v23) = ali::NanoTime(v21);</div><div class="line">  v30 = *v6;</div><div class="line">  v24 = v23;</div><div class="line">  v31 = v27;</div><div class="line">  v25 = (ali *)LzmaDecode(v22, &amp;v31, (int)v12 + 13, &amp;v30, (int)v12, 5, 1, &amp;v32, (int)&amp;off_5901C);</div><div class="line">  v26 = ali::NanoTime(v25);</div><div class="line">  ali::PrettyDuration((ali *)(v26 - v24), v24);</div><div class="line">  j_j_munmap((void *)v12, buf.st_blksize);</div><div class="line">  j_j___android_log_print(</div><div class="line">    3,</div><div class="line">    &quot;debug&quot;,</div><div class="line">    &quot;after uncompressed dex magic %c %c %c %c %c %c %c&quot;,</div><div class="line">    *(_BYTE *)v22,</div><div class="line">    *(_BYTE *)(v22 + 1),</div><div class="line">    *(_BYTE *)(v22 + 2),</div><div class="line">    *(_BYTE *)(v22 + 3),</div><div class="line">    *(_BYTE *)(v22 + 4),</div><div class="line">    *(_BYTE *)(v22 + 5),</div><div class="line">    *(_BYTE *)(v22 + 6));</div><div class="line">  *v6 = v27;</div><div class="line">  if ( v28 )</div><div class="line">    *v28 = (unsigned __int8 *)*((_DWORD *)v5 + 1);</div><div class="line">  return *((_DWORD *)v5 + 1);</div></pre></td></tr></table></figure></p>
+<p>仔细分析代码：<br>v9 = j_j_open(v4, 0); //打开文件<br>v12 = (ali <em>)j_j_mmap(0, </em>v6, 3, 2, v9, 0); //调用mmap加载文件<br>v17 = (ali <em>)ali::decryptRc4… //解密<br> v25 = (ali </em>)LzmaDecode… //解压<br>结合log信息可以看出这里是在解密dex文件头信息，再回到parse_dex中继续查看：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/dvmopendexfile.png" alt=""><br>从图中标记的位置可以看到先加载了libdvm.so，然后调用了openDexFile加载dex文件到内存。再回到sub_256C0（attachBaseContext）函数中：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/init.png" alt=""><br>再解析加载完dex文件后程序调用了init函数（猜测应该是_start函数，这里暂不做具体分析）。<br>分析了libmobisec.so的大致流程，猜测dex加载的地方应该在调用openDexFile函数的位置。</p>
+<h3 id="0x02-动态调试脱壳"><a href="#0x02-动态调试脱壳" class="headerlink" title="0x02 动态调试脱壳"></a>0x02 动态调试脱壳</h3><p>接下来动态调试libmobisec.so，IDA连接上调试器，对libdvm.so中的dvmDexFileOpenPartial函数下断点（查源码可以知道openDexFile最终是通过调用dvmDexFileOpenPartial来加载dex文件的）<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/breakpoint.png" alt=""><br>运行程序jdb附加（关于IDA动态调试so就不再详述，不熟悉的可以看xxxxx），程序在断点处停下来了：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/dumpdex.png" alt=""><br>在下方的hex窗口中可以看到dex已经加载到了内存中，接下来导入下面的脚本dump出dex：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">auto fp,addr_start,addr_now,size,addr_end;</div><div class="line">addr_start = R0;</div><div class="line">size = R1;</div><div class="line">addr_end = addr_start + size;</div><div class="line">fp = fopen(&quot;d:\dump.dex&quot;,&quot;wb&quot;);</div><div class="line">for(addr_now = addr_start; addr_now &lt; addr_start + size; addr_now++)</div><div class="line">	fputc(Byte(addr_now),fp);</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>注:查源码得到dvmDexFileOpenPartial函数的参数1，2分别为dex起始地址和总长度，R0为起始地址，R2为长度。</p>
+</blockquote>
+<h3 id="0x03-分析dump-dex"><a href="#0x03-分析dump-dex" class="headerlink" title="0x03 分析dump.dex"></a>0x03 分析dump.dex</h3><p>用jeb加载dump.dex打开MainActivity：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/MainActivity.png" alt=""><br>标记的地方，调用了ListViewAutoScrollHelpern类的decrypt_native方法，返回值作为key，v1就是输入的url作为value，传给了WebViewActivity，双击decrypt_native查看：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/loadtranslate.png" alt=""><br>可以看到加载了translate库，decrypt是一个native方法，在libtranslate.so中实现，继续看WebViewActivity类：<br><img src="http://ogxxjg42b.bkt.clouddn.com/blog/jacrack/png/WebViewActivity.png" alt=""><br>可以看到showToast中toast的内容就是flag了，查看onCreate中代码明白了app的整体逻辑：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">输入url请求网页 -&gt; 网页中的js脚本调用java代码中的showToast弹出flag。</div></pre></td></tr></table></figure></p>
+<h3 id="0x04-获取flag"><a href="#0x04-获取flag" class="headerlink" title="0x04 获取flag"></a>0x04 获取flag</h3><p>要让程序弹出flag，需要构造构造网页，在网页中插入js脚本调用showToast，所以需要知道addJavaScriptInterface函数的第二个参数（这个参数就是java暴露给js使用的符号）。<br>一般的方法是动态调试查看libtranslate.so中的decrypt_native函数的算法，然后使用相同的逻辑计算出上面字符串解密后的内容，还可以利用dlopen和dlsys函数加载libtranslate.so调用decrypt_native解密字符串。<br>这里采用Xposed hook addJavaScriptInterface方法来获得第二个参数的值。代码很简单，在log中打印第二个参数即可：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class Jscrack implements IXposedHookLoadPackage &#123;</div><div class="line">    @Override</div><div class="line">    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam loadPackageParam) throws Throwable &#123;</div><div class="line">        if (!loadPackageParam.packageName.equals(&quot;com.ali.tg.testapp&quot;)) return;</div><div class="line"></div><div class="line">        findAndHookMethod(&quot;android.webkit.WebView&quot;, loadPackageParam.classLoader, &quot;addJavascriptInterface&quot;, Object.class, String.class, new XC_MethodHook() &#123;</div><div class="line">            @Override</div><div class="line">            protected void beforeHookedMethod(MethodHookParam param) throws Throwable &#123;</div><div class="line">                XposedBridge.log(&quot;before addJavascriptInterface:&quot; + param.args[1].toString());</div><div class="line">            &#125;</div><div class="line"></div><div class="line">            @Override</div><div class="line">            protected void afterHookedMethod(MethodHookParam param) throws Throwable &#123;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>用xposed获取到第二个参数为SmokeyBear，接下来构造网页代码如下：<br><figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!DOCTYPE HTML&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">meta</span> <span class="attr">charset</span>=<span class="string">"gbk"</span>/&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">title</span>&gt;</span>js调用java测试<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line">	<span class="tag">&lt;<span class="name">script</span> <span class="attr">type</span>=<span class="string">"text/javascript"</span>&gt;</span><span class="undefined"></span></div><div class="line">	function fun()</div><div class="line">	&#123;</div><div class="line">		SmokeyBear.showToast();</div><div class="line">	&#125;</div><div class="line">	window.onload=fun;</div><div class="line">	<span class="tag">&lt;/<span class="name">script</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure></p>
+<p>在本地搭建服务器，将网页放到服务器上，在app的输入框中输入该网页的地址访问就可弹出flag。</p>
+<h3 id="0x05-总结"><a href="#0x05-总结" class="headerlink" title="0x05 总结"></a>0x05 总结</h3><p>本文主要分析了在so中用c/c++实现的attachBaseContext方法，在该方法中调用了parse_dex，在这个方法中解析解密dex文件头并通过调用dvm库中的openDexFile加载dex文件到内存中。然后通过动态调试dump出dex文件，分析了dex文件的功能，发现在java中注册了js接口，拿到flag需要请求特定网页在js中调用java中的showToast方法而暴露给js的符号名字需要通过translate库中的decrypt_native方法解密。这里采用的是hook addJavaScriptInterface得到解密的字符串，然后构造网页实现flag获取。<br>分析完后，发现apk中还有很多知识点值得去探索，比如so中的那些加密解密函数、init_classes初始化的内容、利用其他方法获取flag等等。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/逆向-脱壳-破解/" rel="tag">#逆向 脱壳 破解</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/24/jni之java和c互相调用/" rel="next" title="jni之java和c互相调用">
+                <i class="fa fa-chevron-left"></i> jni之java和c互相调用
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/12/11/aliCTF143/"
+           data-title="阿里CTF2014第三题分析" data-url="http://fengcheche1520.github.io/2016/12/11/aliCTF143/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ogxxjg42b.bkt.clouddn.com/blog/image/gif/portrait.gif"
+               alt="zj lu" />
+          <p class="site-author-name" itemprop="name">zj lu</p>
+          <p class="site-description motion-element" itemprop="description">biubiubiu~</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/fengcheche1520" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/234329236" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#0x00-初步分析"><span class="nav-number">1.</span> <span class="nav-text">0x00 初步分析</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x01-静态分析mobisec"><span class="nav-number">2.</span> <span class="nav-text">0x01 静态分析mobisec</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x02-动态调试脱壳"><span class="nav-number">3.</span> <span class="nav-text">0x02 动态调试脱壳</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x03-分析dump-dex"><span class="nav-number">4.</span> <span class="nav-text">0x03 分析dump.dex</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x04-获取flag"><span class="nav-number">5.</span> <span class="nav-text">0x04 获取flag</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#0x05-总结"><span class="nav-number">6.</span> <span class="nav-text">0x05 总结</span></a></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zj lu</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"biubiuno"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>

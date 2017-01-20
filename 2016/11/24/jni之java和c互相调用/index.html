@@ -1,0 +1,680 @@
+<!doctype html>
+
+
+
+
+<html class="theme-next pisces">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.4.0" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.0.2" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android JNI," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.0.2" />
+
+
+
+
+
+
+<meta name="description" content="JNI（Java Native Interface），java本地接口，允许java代码和其它程序语言交互。
+
+Android开发中JAVA与C/C++的交互是最常见的,先配置好java环境,接下来依次介绍java调用c和c调用java的实现过程。
+1. java调用c函数的实现1. 定义java类,JniClass.java1234public class JniClass&amp;#123;">
+<meta property="og:type" content="article">
+<meta property="og:title" content="jni之java和c互相调用">
+<meta property="og:url" content="http://fengcheche1520.github.io/2016/11/24/jni之java和c互相调用/index.html">
+<meta property="og:site_name" content="biubiubiu~的博客">
+<meta property="og:description" content="JNI（Java Native Interface），java本地接口，允许java代码和其它程序语言交互。
+
+Android开发中JAVA与C/C++的交互是最常见的,先配置好java环境,接下来依次介绍java调用c和c调用java的实现过程。
+1. java调用c函数的实现1. 定义java类,JniClass.java1234public class JniClass&amp;#123;">
+<meta property="og:updated_time" content="2017-01-20T13:02:23.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="jni之java和c互相调用">
+<meta name="twitter:description" content="JNI（Java Native Interface），java本地接口，允许java代码和其它程序语言交互。
+
+Android开发中JAVA与C/C++的交互是最常见的,先配置好java环境,接下来依次介绍java调用c和c调用java的实现过程。
+1. java调用c函数的实现1. 定义java类,JniClass.java1234public class JniClass&amp;#123;">
+
+
+
+<script type="text/javascript" id="hexo.configuration">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    scheme: 'Pisces',
+    sidebar: {"position":"left","display":"always"},
+    fancybox: true,
+    motion: false,
+    duoshuo: {
+      userId: '6356836129215350000',
+      author: 'author'
+    }
+  };
+</script>
+
+
+
+
+  <link rel="canonical" href="http://fengcheche1520.github.io/2016/11/24/jni之java和c互相调用/"/>
+
+
+  <title> jni之java和c互相调用 | biubiubiu~的博客 </title>
+</head>
+
+<body itemscope itemtype="//schema.org/WebPage" lang="zh-CN">
+
+  
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container one-collumn sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="//schema.org/WPHeader">
+      <div class="header-inner"><div class="site-meta ">
+  
+
+  <div class="custom-logo-site-title">
+    <a href="/"  class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <span class="site-title">biubiubiu~的博客</span>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+  <p class="site-subtitle">欢迎来到我的博客</p>
+</div>
+
+<div class="site-nav-toggle">
+  <button>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+    <span class="btn-bar"></span>
+  </button>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-schedule">
+          <a href="/schedule" rel="section">
+            
+            日程
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about/index.html" rel="section">
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+    </ul>
+  
+
+  
+</nav>
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="//schema.org/Article">
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                jni之java和c互相调用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            <span class="post-meta-item-icon">
+              <i class="fa fa-calendar-o"></i>
+            </span>
+            <span class="post-meta-item-text">发表于</span>
+            <time itemprop="dateCreated" datetime="2016-11-24T21:45:20+08:00" content="2016-11-24">
+              2016-11-24
+            </time>
+          </span>
+
+          
+
+          
+            
+              <span class="post-comments-count">
+                &nbsp; | &nbsp;
+                <a href="/2016/11/24/jni之java和c互相调用/#comments" itemprop="discussionUrl">
+                  <span class="post-comments-count ds-thread-count" data-thread-key="2016/11/24/jni之java和c互相调用/" itemprop="commentsCount"></span>
+                </a>
+              </span>
+            
+          
+
+          
+
+          
+          
+
+          
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <blockquote>
+<p>JNI（Java Native Interface），java本地接口，允许java代码和其它程序语言交互。</p>
+</blockquote>
+<p>Android开发中JAVA与C/C++的交互是最常见的,先配置好java环境,接下来依次介绍java调用c和c调用java的实现过程。</p>
+<h3 id="1-java调用c函数的实现"><a href="#1-java调用c函数的实现" class="headerlink" title="1. java调用c函数的实现"></a>1. java调用c函数的实现</h3><p><em>1.</em> 定义java类,JniClass.java<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">JniClass</span></span>&#123;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">native</span> String <span class="title">get</span><span class="params">()</span></span>;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">native</span> <span class="keyword">boolean</span> <span class="title">set</span><span class="params">(String str)</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><em>2.</em> 使用javah命令生成头文件JniClass.h<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">$ javah JniClass</div><div class="line">$ ls</div><div class="line">JniClass.h  JniClass.java</div></pre></td></tr></table></figure></p>
+<p>（也可以不用javah生成头文件，自己写JniClass.h，但是一般不这样做，容易出错而且浪费时间）</p>
+<p><em>3.</em> 创建c源文件JniClass.c：（直接复制一份JniClass.h修改后缀为.c然后修改内容即可）<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"JniClass.h"</span></span></div><div class="line"><span class="meta">#<span class="meta-keyword">include</span><span class="meta-string">&lt;stdio.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="keyword">const</span> <span class="keyword">char</span> *CONST=<span class="literal">NULL</span>;	<span class="comment">//定义常量用来存调用set后的值</span></div><div class="line"></div><div class="line"><span class="comment">//获取CONST的值，如果为空就返回hello</span></div><div class="line"><span class="function">JNIEXPORT jstring JNICALL <span class="title">Java_JniClass_get</span><span class="params">(JNIEnv *env, jobject thiz)</span></span>&#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"(invoke get from c)\n"</span>);</div><div class="line">        <span class="keyword">if</span>(CONST==<span class="literal">NULL</span>)&#123;</div><div class="line">                <span class="keyword">return</span> (*env)-&gt;NewStringUTF(env,<span class="string">"hello"</span>);</div><div class="line">        &#125;<span class="keyword">else</span>&#123;</div><div class="line">                <span class="keyword">return</span> (*env)-&gt;NewStringUTF(env,CONST);</div><div class="line">        &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//设置CONST的值</span></div><div class="line"><span class="function">JNIEXPORT jboolean JNICALL <span class="title">Java_JniClass_set</span><span class="params">(JNIEnv *env, jobject thiz, jstring <span class="built_in">string</span>)</span></span>&#123;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"(invoke set from c)\n"</span>);</div><div class="line">        <span class="keyword">char</span> *str = (<span class="keyword">char</span> *)(*env)-&gt;GetStringUTFChars(env,<span class="built_in">string</span>,<span class="literal">NULL</span>);</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"set string: %s\n"</span>,str);</div><div class="line">        CONST=str;	<span class="comment">//这里的赋值只是为了方便，这种赋值方式在str被回收后就会出问题</span></div><div class="line">        (*env)-&gt;ReleaseStringUTFChars(env,<span class="built_in">string</span>,<span class="literal">NULL</span>);</div><div class="line"></div><div class="line">        <span class="keyword">return</span> JNI_TRUE;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><em>4.</em> 将c源文件编译为so共享库<br>编译c源文件为so库有一下两种方式:<br>a. 将.c源文件编译为.o目标文件, 然后把.o目标文件链接为.so共享库<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">$ gcc -c <span class="_">-f</span>PIC -I/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/include -I/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/include/linux/ JniClass.c</div><div class="line">$ gcc -shared <span class="_">-f</span>PIC -o libjni.so JniClass.o</div></pre></td></tr></table></figure></p>
+<p>b. 直接编译生成共享库<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gcc -shared <span class="_">-f</span>PIC -I/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/include -I/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/include/linux/ -o libjni.so JniClass.c</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>xxx/include/是jni.h文件所在路径，xxx/include/linux是jni_md.h所在路径。<br>也可以将这两个文件拷贝到当前目录不加-I编译，只是需要将开始javah生成的头文件里面的#include<jni.h>修改为#include ”jni.h”（用“”包含的头文件在编译时会现在当前目录下查找，用&lt;&gt;包含的头文件会直接去类库中查找），然后执行gcc -fPIC -shared -o libjni.so JniClass.c</jni.h></p>
+</blockquote>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">-fPIC解释:</div><div class="line">PIC（position independent code）位置无关代码，so文件加载到内存中的地址不变，如果不加PIC则编译出来的so需要在每次加载时进行重定位。PIC依赖GOT和PLT来实现重定位.</div><div class="line"></div><div class="line">关于重定位:共享库（又叫动态库）是在程序运行过程中加载到内存中的，共享库在编译和链接时，其中的符号都是用的相对地址（GOT表中），因此在程序在载入共享库时需要定位符号在内存中的位置</div></pre></td></tr></table></figure>
+<p>编译完成后会在目录下生成libjni.so</p>
+<p><em>5.</em> 编写java入口函数Main.java，调用本地库中定义的方法get/set<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">Main</span></span>&#123;</div><div class="line"></div><div class="line">        <span class="keyword">static</span>&#123;</div><div class="line">                System.loadLibrary(<span class="string">"jni"</span>);</div><div class="line">        &#125;</div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line"></div><div class="line">                JniClass jc = <span class="keyword">new</span> JniClass();</div><div class="line">                System.out.println(jc.get());</div><div class="line">                jc.set(<span class="string">"hi!"</span>);</div><div class="line">                System.out.println(jc.get());</div><div class="line">        &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><em>6.</em> javac编译Main.java<br>执行export LD_LIBRARY_PATH=.将当前目录添加到共享库环境变量中</p>
+<p><em>7.</em> 运行java程序<br>java Main<br>non@uu:~/workdir/jni$ java Main<br>(invoke get from c)<br>hello<br>(invoke set from c)<br>set string: hi!<br>(invoke get from c)<br>hi!</p>
+<h3 id="2-c调用java函数的实现"><a href="#2-c调用java函数的实现" class="headerlink" title="2. c调用java函数的实现"></a>2. c调用java函数的实现</h3><p>c调用java主要有两种方式, 一种是在JNI中调用java, 另一种是在c代码中创建java虚拟机来调用java, 接下来分别介绍这两种的实现</p>
+<h4 id="在JNI中调用java方法"><a href="#在JNI中调用java方法" class="headerlink" title="在JNI中调用java方法"></a>在JNI中调用java方法</h4><p>在JniClass.java中添加一个方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> String <span class="title">func</span><span class="params">()</span></span>&#123;</div><div class="line">	System.out.println(<span class="string">"func called"</span>);</div><div class="line">	<span class="keyword">return</span> <span class="string">"a msg from java func"</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>（这个方法将在jni中用c调用，这里定义static方法是为了方便直接调用,非静态的方法只是多一步创建类, 其它的步骤都是一样）</p>
+</blockquote>
+<p>在JniClass.c源文件中定义调用func的函数 callJavaStaticMethod<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">callJavaStaticMethod</span><span class="params">(JNIEnv *env,jobject thiz)</span></span>&#123;</div><div class="line">        <span class="comment">//先通过JNI环境找到类</span></div><div class="line">        jclass clazz = (*env)-&gt;FindClass(env,<span class="string">"JniClass"</span>);</div><div class="line">        <span class="keyword">if</span>(clazz==<span class="literal">NULL</span>)&#123;</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"find class error\n"</span>);</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//再通过类找到类中定义的方法id（最后一个参数是java的签名，可以用javap JniClass.class查看）</span></div><div class="line">        jmethodID mid = (*env)-&gt;GetStaticMethodID(env,clazz,<span class="string">"func"</span>,<span class="string">"()Ljava/lang/String;"</span>);</div><div class="line">        <span class="keyword">if</span>(mid==<span class="literal">NULL</span>)&#123;</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"find method error\n"</span>);</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//最后通过方法id调用java方法（如果有参数就加在mid的后面）</span></div><div class="line">        jstring <span class="built_in">string</span> = (jstring)(*env)-&gt;CallStaticObjectMethod(env,clazz,mid);</div><div class="line">        <span class="comment">//获取java方法返回的结果</span></div><div class="line">        <span class="keyword">char</span> *str = (<span class="keyword">char</span> *)(*env)-&gt;GetStringUTFChars(env,<span class="built_in">string</span>,<span class="literal">NULL</span>);</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"func return:%s\n"</span>,str);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在JniClass.c的set中最后一行调用上面的函数<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">…</div><div class="line">callJavaStaticMethod(env,thiz);</div><div class="line"><span class="keyword">return</span> JNI_TRUE;</div></pre></td></tr></table></figure></p>
+<p>编译生成so<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gcc <span class="_">-f</span>PIC -shared -o libjni.so JniClass.c</div></pre></td></tr></table></figure></p>
+<p>修改Main.java，将调用get的语句注释掉<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">main</span><span class="params">(String[] args)</span></span>&#123;</div><div class="line"></div><div class="line">        JniClass jc = <span class="keyword">new</span> JniClass();</div><div class="line">        <span class="comment">//System.out.println(jc.get());</span></div><div class="line">        jc.set(<span class="string">"hi!"</span>);</div><div class="line">        <span class="comment">//System.out.println(jc.get());</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>重新编译Main.java和JniClass.java生成class字节码，然后运行<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ java Main </div><div class="line">(invoke <span class="built_in">set</span> from c)</div><div class="line"><span class="built_in">set</span> string: hi!</div><div class="line">func called</div><div class="line">func <span class="built_in">return</span>:a msg from java func</div></pre></td></tr></table></figure></p>
+<p>如果不出错的话，程序输出应该会和上面的输出一致，可以看到java的func在JNI中被调用了，并将返回值也传给了c。</p>
+<p>这种在JNI定义的C中调用java的方法，程序执行的流程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">java Main执行程序-&gt;调用JNI定义的本地方法set-&gt;调用java中的函数-&gt;处理返回结果</div></pre></td></tr></table></figure></p>
+<p>可以看出程序是直接运行在java的虚拟机jvm进程中的。</p>
+<h4 id="在c代码中创建JVM虚拟机执行java代码"><a href="#在c代码中创建JVM虚拟机执行java代码" class="headerlink" title="在c代码中创建JVM虚拟机执行java代码"></a>在c代码中创建JVM虚拟机执行java代码</h4><p>新建ccalljava.c<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#<span class="meta-keyword">include</span> <span class="meta-string">"jni.h"</span></span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">main</span><span class="params">()</span></span>&#123;</div><div class="line"></div><div class="line">        JavaVM *jvm;	<span class="comment">//jvm虚拟机指针，用来操作jvm虚拟机。（*jvm）-&gt;xxx</span></div><div class="line">        JNIEnv *env;	<span class="comment">//JNI环境指针，用来调用方法。(*env)-&gt;xxx</span></div><div class="line">        JavaVMInitArgs vmargs;	<span class="comment">//初始化参数</span></div><div class="line">        JavaVMOption options[<span class="number">1</span>];	<span class="comment">//jvm启动参数</span></div><div class="line">        <span class="keyword">long</span> status;	<span class="comment">//获取jvm创建状态</span></div><div class="line"></div><div class="line">        <span class="comment">//指定java类路径</span></div><div class="line">        options[<span class="number">0</span>].optionString = <span class="string">"-Djava.class.path=."</span>;</div><div class="line">        vmargs.version = JNI_VERSION_1_6;</div><div class="line">        vmargs.nOptions = <span class="number">1</span>;</div><div class="line">        vmargs.options = options;</div><div class="line"></div><div class="line">        <span class="comment">//创建并初始化Java虚拟机</span></div><div class="line">        status = JNI_CreateJavaVM(&amp;jvm,(<span class="keyword">void</span>**)&amp;env,&amp;vmargs);</div><div class="line">        <span class="keyword">if</span>(status==JNI_ERR)&#123;</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"error:%ld\n"</span>,status);</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"create jvm success\n"</span>);</div><div class="line">        <span class="comment">//接下来调用java类中的方法，和在JNI中调用的过程是一样的</span></div><div class="line">        jclass clazz = (*env)-&gt;FindClass(env,<span class="string">"JniClass"</span>);</div><div class="line">        <span class="keyword">if</span>(clazz==<span class="literal">NULL</span>)&#123;</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"find class error\n"</span>);</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        jmethodID mid = (*env)-&gt;GetStaticMethodID(env,clazz,<span class="string">"func"</span>,<span class="string">"()Ljava/lang/String;"</span>);</div><div class="line">        <span class="keyword">if</span>(mid==<span class="literal">NULL</span>)&#123;</div><div class="line">                <span class="built_in">printf</span>(<span class="string">"find method error\n"</span>);</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">        &#125;</div><div class="line">        jstring <span class="built_in">string</span> = (jstring)(*env)-&gt;CallStaticObjectMethod(env,clazz,mid);</div><div class="line">        <span class="keyword">char</span> *str = (<span class="keyword">char</span> *)(*env)-&gt;GetStringUTFChars(env,<span class="built_in">string</span>,<span class="literal">NULL</span>);</div><div class="line">        <span class="built_in">printf</span>(<span class="string">"func return:%s\n"</span>,str);</div><div class="line">        <span class="comment">//销毁Java虚拟机</span></div><div class="line">        <span class="built_in">printf</span>(<span class="string">"%d\n"</span>,(*jvm)-&gt;DestroyJavaVM(jvm));</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>用gcc命令编译生成可执行文件<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ gcc ccalljava.c -L/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/jre/lib/amd64/server -ljvm</div></pre></td></tr></table></figure></p>
+<p>编译完成后会在目录下生成a.out<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">命令选项解释:</div><div class="line">/usr/local/java/jdk1.8.0_111/jre/lib/amd64/server是libjvm.so所在的目录，也可以将libjvm.so复制到当前目录然后用gcc ccalljava.c -L. -ljvm编译。</div><div class="line">JVM所有的函数实现都是在libjvm.so中，在c里面调用了jni.h头文件中声明的方法，gcc在编译的时候需要需要确定这些符号是否正确（就是要确定符号在库文件中是否存在），所以需要加上-ljvm选项</div></pre></td></tr></table></figure></p>
+<p>指定程序运行时加载库的路径<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$ <span class="built_in">export</span> LD_LIBRARY_PATH=/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/jre/lib/amd64/server</div></pre></td></tr></table></figure></p>
+<p>LD_LIBRARY_PATH用于linux中指定程序加载运行时查找动态库的路径，上面的amd64下是存放libjava.so等库文件的路径（加载的时候是从LD_LIBRARY_PATH指定的路径往上一层的路径中查找的，不知道是为什么）. linux中还有一个环境变量:LIBRARY_PATH, 用于linux中指定程序编译时查找动态库的路径，也可以由-L直接指定.</p>
+<p>直接在命令行中执行export在关闭shell时就无效了，下一次打开需要重新指定路径，可以在～/.bashrc文件的末尾中添加:<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="built_in">export</span> LD_LIBRARY_PATH=/usr/<span class="built_in">local</span>/java/jdk1.8.0_111/jre/lib/amd64/server:$ LD_LIBRARY_PATH</div></pre></td></tr></table></figure></p>
+<p>保存,然后执行source ~/.bashrc更新配置</p>
+<p>执行a.out<br><figure class="highlight sh"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">$ ./a.out </div><div class="line">create jvm success</div><div class="line">func called</div><div class="line">func <span class="built_in">return</span>:a msg from java func</div><div class="line">0</div></pre></td></tr></table></figure></p>
+<p>这种调用java的流程：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">执行a.out-&gt;创建JavaVM虚拟机-&gt;在JVM中执行java-&gt;取得返回结果</div></pre></td></tr></table></figure></p>
+<p>可以看到,在这种方式中, java代码是运行在c程序的进程中创建的jvm中的.</p>
+<p>附:<a href="http://docs.oracle.com/javase/8/docs/technotes/guides/jni/spec/jniTOC.html" target="_blank" rel="external">JNI官方文档</a></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android-JNI/" rel="tag">#Android JNI</a>
+          
+        </div>
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2016/11/20/hexo/" rel="next" title="在ubuntu中利用hexo和github搭建博客">
+                <i class="fa fa-chevron-left"></i> 在ubuntu中利用hexo和github搭建博客
+              </a>
+            
+          </div>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2016/12/11/aliCTF143/" rel="prev" title="阿里CTF2014第三题分析">
+                阿里CTF2014第三题分析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+      <div class="ds-thread" data-thread-key="2016/11/24/jni之java和c互相调用/"
+           data-title="jni之java和c互相调用" data-url="http://fengcheche1520.github.io/2016/11/24/jni之java和c互相调用/">
+      </div>
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel ">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="//schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ogxxjg42b.bkt.clouddn.com/blog/image/gif/portrait.gif"
+               alt="zj lu" />
+          <p class="site-author-name" itemprop="name">zj lu</p>
+          <p class="site-description motion-element" itemprop="description">biubiubiu~</p>
+        </div>
+        <nav class="site-state motion-element">
+          <div class="site-state-item site-state-posts">
+            <a href="/">
+              <span class="site-state-item-count">5</span>
+              <span class="site-state-item-name">日志</span>
+            </a>
+          </div>
+
+          
+
+          
+            <div class="site-state-item site-state-tags">
+              <a href="/tags">
+                <span class="site-state-item-count">4</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/fengcheche1520" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+              <span class="links-of-author-item">
+                <a href="http://weibo.com/234329236" target="_blank" title="Weibo">
+                  
+                    <i class="fa fa-fw fa-weibo"></i>
+                  
+                  Weibo
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+      </section>
+
+      
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+            
+              
+            
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-java调用c函数的实现"><span class="nav-number">1.</span> <span class="nav-text">1. java调用c函数的实现</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-c调用java函数的实现"><span class="nav-number">2.</span> <span class="nav-text">2. c调用java函数的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#在JNI中调用java方法"><span class="nav-number">2.1.</span> <span class="nav-text">在JNI中调用java方法</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#在c代码中创建JVM虚拟机执行java代码"><span class="nav-number">2.2.</span> <span class="nav-text">在c代码中创建JVM虚拟机执行java代码</span></a></li></ol></li></ol></div>
+            
+          </div>
+        </section>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy; 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">zj lu</span>
+</div>
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Pisces
+  </a>
+</div>
+
+        
+
+        
+      </div>
+    </footer>
+
+    <div class="back-to-top">
+      <i class="fa fa-arrow-up"></i>
+    </div>
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.0.2"></script>
+
+
+
+  
+  
+
+
+  <script type="text/javascript" src="/js/src/affix.js?v=5.0.2"></script>
+
+  <script type="text/javascript" src="/js/src/schemes/pisces.js?v=5.0.2"></script>
+
+
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.0.2"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.0.2"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.0.2"></script>
+
+
+
+  
+
+  
+    
+  
+
+  <script type="text/javascript">
+    var duoshuoQuery = {short_name:"biubiuno"};
+    (function() {
+      var ds = document.createElement('script');
+      ds.type = 'text/javascript';ds.async = true;
+      ds.id = 'duoshuo-script';
+      ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+      ds.charset = 'UTF-8';
+      (document.getElementsByTagName('head')[0]
+      || document.getElementsByTagName('body')[0]).appendChild(ds);
+    })();
+  </script>
+
+  
+    
+    <script src="/lib/ua-parser-js/dist/ua-parser.min.js?v=0.7.9"></script>
+    <script src="/js/src/hook-duoshuo.js"></script>
+  
+
+
+
+
+
+
+  
+  
+
+  
+
+  
+
+  
+
+  
+
+
+</body>
+</html>
